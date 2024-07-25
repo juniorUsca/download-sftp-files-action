@@ -48574,10 +48574,9 @@ conn.on('ready', () => {
             }
             const listToDownload = allFiles
                 .filter(file => {
-                return filesToDownload.some(fileInput => fileInput === file.filename);
-            })
-                .filter(file => {
-                return filePatternsToDownload.some(pattern => file.filename.match(pattern) !== null);
+                const inFilenames = filesToDownload.some(fileInput => fileInput === file.filename);
+                const inFilePatterns = filePatternsToDownload.some(pattern => file.filename.match(pattern) !== null);
+                return inFilenames || inFilePatterns;
             })
                 .map(file => ({
                 filename: file.filename,
