@@ -48584,7 +48584,7 @@ conn.on('ready', () => {
                 remotePath: node_path_1.default.posix.join(remoteDirPath, file.filename),
             }));
             core.setOutput('filenames', listToDownload.map(file => file.filename).join(', '));
-            core.setOutput('filepaths', JSON.stringify(listToDownload.map(file => node_path_1.default.join(localDirPath, file.filename))));
+            core.setOutput('file-paths', JSON.stringify(listToDownload.map(file => node_path_1.default.join(localDirPath, file.filename))));
             if (listToDownload.length === 0) {
                 console.log('No files to download');
                 console.log('Files in remote directory:', allFiles.map(file => file.filename).join(', '));

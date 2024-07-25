@@ -126,7 +126,7 @@ conn.on('ready', () => {
         }))
 
       core.setOutput('filenames', listToDownload.map(file => file.filename).join(', '))
-      core.setOutput('filepaths', JSON.stringify(
+      core.setOutput('file-paths', JSON.stringify(
         listToDownload.map(file => path.join(localDirPath, file.filename))
       ))
 
