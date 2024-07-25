@@ -1,6 +1,6 @@
 import path from 'node:path'
 import fs from 'node:fs'
-import core from '@actions/core'
+import * as core from '@actions/core'
 
 import { Client, type SFTPWrapper, type ConnectConfig } from 'ssh2'
 import { type FileToDownload } from './types'
