@@ -48446,22 +48446,45 @@ exports["default"] = _default;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const node_path_1 = __importDefault(__nccwpck_require__(9411));
-const core_1 = __importDefault(__nccwpck_require__(9093));
+const core = __importStar(__nccwpck_require__(9093));
 const ssh2_1 = __nccwpck_require__(9564);
-const remoteDirPath = core_1.default.getInput('remote-dir-path');
-const localDirPath = core_1.default.getInput('local-dir-path');
-const host = core_1.default.getInput('host');
-const port = +core_1.default.getInput('port');
-const username = core_1.default.getInput('username');
-const password = core_1.default.getInput('password');
-const filenames = core_1.default.getInput('filenames');
-const filePatterns = core_1.default.getInput('file-patterns');
-const failIfNoFiles = core_1.default.getInput('fail-if-no-files') === 'true';
+const remoteDirPath = core.getInput('remote-dir-path');
+const localDirPath = core.getInput('local-dir-path');
+const host = core.getInput('host');
+const port = +core.getInput('port');
+const username = core.getInput('username');
+const password = core.getInput('password');
+const filenames = core.getInput('filenames');
+const filePatterns = core.getInput('file-patterns');
+const failIfNoFiles = core.getInput('fail-if-no-files') === 'true';
 const filesToDownload = filenames
     .split(',')
     .map(filename => filename.trim())
@@ -48491,7 +48514,7 @@ const executeAction = (conn, sftp, listToDownload, position) => {
         if (errFastGet) {
             console.log(`Error downloading file: ${item.remotePath} to ${item.localPath}`);
             conn.end();
-            core_1.default.setFailed(errFastGet.message);
+            core.setFailed(errFastGet.message);
             throw errFastGet;
         }
         console.log(`Downloaded to ${item.localPath} ✅`);
@@ -48540,13 +48563,13 @@ conn.on('ready', () => {
     console.log('SFTP Client :: ready');
     conn.sftp((err, sftp) => {
         if (err) {
-            core_1.default.setFailed(err.message);
+            core.setFailed(err.message);
             throw err;
         }
         sftp.readdir(remoteDirPath, (errReadDir, allFiles) => {
             if (errReadDir) {
                 conn.end();
-                core_1.default.setFailed(errReadDir.message);
+                core.setFailed(errReadDir.message);
                 throw errReadDir;
             }
             const listToDownload = allFiles
@@ -48561,14 +48584,14 @@ conn.on('ready', () => {
                 localPath: node_path_1.default.join(localDirPath, file.filename),
                 remotePath: node_path_1.default.posix.join(remoteDirPath, file.filename),
             }));
-            core_1.default.setOutput('filenames', listToDownload.map(file => file.filename).join(', '));
-            core_1.default.setOutput('filepaths', JSON.stringify(listToDownload.map(file => node_path_1.default.join(localDirPath, file.filename))));
+            core.setOutput('filenames', listToDownload.map(file => file.filename).join(', '));
+            core.setOutput('filepaths', JSON.stringify(listToDownload.map(file => node_path_1.default.join(localDirPath, file.filename))));
             if (listToDownload.length === 0) {
                 console.log('No files to download');
                 console.log('Files in remote directory:', allFiles.map(file => file.filename).join(', '));
                 conn.end();
                 if (failIfNoFiles) {
-                    core_1.default.setFailed('No files to download');
+                    core.setFailed('No files to download');
                 }
                 return;
             }
@@ -48581,7 +48604,7 @@ conn.on('ready', () => {
 });
 conn.on('error', err => {
     console.error(`Error caught, ${err}`);
-    core_1.default.setFailed(err.message);
+    core.setFailed(err.message);
     throw err;
 });
 conn.connect(credentials);
