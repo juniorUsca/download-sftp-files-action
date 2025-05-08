@@ -11,11 +11,11 @@ const host = core.getInput('host')
 const port = +core.getInput('port')
 const username = core.getInput('username')
 const password = core.getInput('password')
-const filenames = core.getInput('filenames')
+const fileNames = core.getInput('file-names')
 const filePatterns = core.getInput('file-patterns')
 const failIfNoFiles = core.getInput('fail-if-no-files') === 'true'
 
-const filesToDownload = filenames
+const filesToDownload = fileNames
   .split(',')
   .map(filename => filename.trim())
   .filter(filename => filename !== '')
@@ -33,10 +33,17 @@ const credentials: ConnectConfig = {
   password,
 }
 
-console.log(`It will be attempted to download the files with the following patterns: ${filePatterns}`)
-console.log(`It will be attempted to download the files with the following filenames: ${filenames}`)
+console.log(`It will be attempted to download the files with the following file-patterns: ${filePatterns}`)
+console.log(`It will be attempted to download the files with the following file-names: ${fileNames}`)
 
-const executeAction = (conn: Client, sftp: SFTPWrapper, listToDownload: FileToDownload[], position: number) => {
+if (filesToDownload.length === 0 && filePatternsToDownload.length === 0) {
+  console.log('No files provided to download')
+  console.log('Please provide at least one file name or file pattern to download')
+  core.setFailed('No files provided to download')
+  throw new Error('No files provided to download')
+}
+
+const executeAction = (conn: Client, sftp: SFTPWrapper, listToDownload: FileToDownload[], position: number, method: 'normal' | 'stream' = 'normal') => {
   const item = listToDownload.at(position)
   if (!item) {
     conn.end()
@@ -45,17 +52,48 @@ const executeAction = (conn: Client, sftp: SFTPWrapper, listToDownload: FileToDo
   console.log(`Downloading ${item.remotePath} to ${item.localPath}`)
 
   // normal download
-  sftp.fastGet(item.remotePath, item.localPath, errFastGet => {
-    if (errFastGet) {
-      console.log(`Error downloading file: ${item.remotePath} to ${item.localPath}`)
-      conn.end()
-      core.setFailed(errFastGet.message)
-      throw errFastGet
-    }
-    console.log(`Downloaded to ${item.localPath} ✅`)
+  if (method === 'normal') {
+    sftp.fastGet(item.remotePath, item.localPath, errFastGet => {
+      if (errFastGet) {
+        console.log(`Error downloading file: ${item.remotePath} to ${item.localPath} using fastGet`)
 
-    executeAction(conn, sftp, listToDownload, position + 1)
-  })
+        console.error(errFastGet)
+
+        console.log('Trying download using stream')
+
+        executeAction(conn, sftp, listToDownload, position, 'stream')
+        return
+
+        // conn.end()
+        // core.setFailed(errFastGet.message)
+        // throw errFastGet
+      }
+
+      console.log(`Downloaded to ${item.localPath} using fastGet ✅`)
+      executeAction(conn, sftp, listToDownload, position + 1, method)
+    })
+  }
+  if (method === 'stream') {
+    const wtr = fs.createWriteStream(item.localPath, { autoClose: true })
+    const rdr = sftp.createReadStream(item.remotePath, { autoClose: true })
+    rdr.once('error', (err: Error) => {
+      console.error('Error downloading file: ' + err)
+      conn.end()
+      core.setFailed(err.message)
+      throw err
+    })
+    rdr.once('error', (err: Error) => {
+      console.error('Error writing file: ' + err)
+      conn.end()
+      core.setFailed(err.message)
+      throw err
+    })
+    rdr.once('end', () => {
+      console.log(`Downloaded to ${item.localPath} using stream ✅`)
+      executeAction(conn, sftp, listToDownload, position + 1, method)
+    })
+    rdr.pipe(wtr)
+  }
 
   // victor download method
   // sftp.readFile(remoteFile, (err, data) => {
@@ -115,9 +153,9 @@ conn.on('ready', () => {
 
       const listToDownload: FileToDownload[] = allFiles
         .filter(file => {
-          const inFilenames = filesToDownload.some(fileInput => fileInput === file.filename)
+          const inFileNames = filesToDownload.some(fileInput => fileInput === file.filename)
           const inFilePatterns = filePatternsToDownload.some(pattern => file.filename.match(pattern) !== null)
-          return inFilenames || inFilePatterns
+          return inFileNames || inFilePatterns
         })
         .map(file => ({
           filename: file.filename,
@@ -125,14 +163,16 @@ conn.on('ready', () => {
           remotePath: path.posix.join(remoteDirPath, file.filename),
         }))
 
-      core.setOutput('filenames', listToDownload.map(file => file.filename).join(', '))
+      core.setOutput('file-names', JSON.stringify(
+        listToDownload.map(file => file.filename)
+      ))
       core.setOutput('file-paths', JSON.stringify(
         listToDownload.map(file => path.join(localDirPath, file.filename))
       ))
 
       if (listToDownload.length === 0) {
         console.log('No files to download')
-        console.log('Files in remote directory:', allFiles.map(file => file.filename).join(', '))
+        console.log(`Files in remote directory: ${remoteDirPath}`, allFiles.map(file => file.filename).join(', '))
 
         conn.end()
         if (failIfNoFiles){
@@ -145,7 +185,7 @@ conn.on('ready', () => {
       console.log('Files to download:', listToDownload.map(file => file.filename).join(', '))
       console.log('Downloading files...')
 
-      executeAction(conn, sftp, listToDownload, 0)
+      executeAction(conn, sftp, listToDownload, 0, 'normal')
     })
 
   })

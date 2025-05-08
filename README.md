@@ -10,7 +10,7 @@ This action downloads files from a remote server using SFTP.
 
 ### `port`
 
-**Required** The port of the remote server.
+The port of the remote server. Default is `22`.
 
 ### `username`
 
@@ -20,9 +20,9 @@ This action downloads files from a remote server using SFTP.
 
 **Required** The password of the remote server.
 
-### `filenames`
+### `file-names`
 
-The filenames to download from the remote server, separated by commas. Default is ``.
+The file names to download from the remote server, separated by commas. Default is ``.
 Example: `registry.json,package.json`
 
 ### `file-patterns`
@@ -36,7 +36,7 @@ Example: `^registry.*\.json$,^package.*\.json$`
 
 ### `local-dir-path`
 
-**Required** The local directory path to download files to. Default is `.`.
+The local directory path to download files to. Default is `.`.
 
 ### `fail-if-no-files`
 
@@ -45,9 +45,9 @@ Whether to fail if files are not found. Default is `'false'`. To Activate, set t
 
 ## Outputs
 
-### `filenames`
+### `file-names`
 
-The filenames that were attempted to be downloaded. Separated by commas.
+The file names that were attempted to be downloaded. Array of strings.
 
 ### `file-paths`
 
@@ -62,7 +62,8 @@ with:
   port: '22'
   username: 'user'
   password: 'password'
-  filenames: 'registry.json,package.json'
+  file-names: 'registry.json,package.json'
+  file-patterns: '^registry.*\.json$,^package.*\.json$'
   remote-dir-path: '/path/to/remote/dir'
   local-dir-path: '/path/to/local/dir'
   fail-if-no-files: 'true'

@@ -6,7 +6,6 @@ inputs:
     required: true
   port:
     description: 'SFTP port'
-    required: true
     default: '22'
   username:
     description: 'SFTP username'
@@ -14,7 +13,7 @@ inputs:
   password:
     description: 'SFTP password'
     required: true
-  filenames:
+  file-names:
     description: 'File names separated by comma'
     default: ''
   file-patterns:
@@ -25,11 +24,9 @@ inputs:
     required: true
   local-dir-path:
     description: 'Local directory path'
-    required: true
     default: '.'
   fail-if-no-files:
-    description: 'Fail if no files are found. To activate set to ''true'''
-    required: true
+    description: 'Fail if no files are found. Default ''false''. To activate set to ''true'''
     default: 'false'
 runs:
   using: 'node20'
