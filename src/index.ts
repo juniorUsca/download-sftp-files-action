@@ -163,12 +163,29 @@ conn.on('ready', () => {
           remotePath: path.posix.join(remoteDirPath, file.filename),
         }))
 
+      const listNotFound = filesToDownload.filter(fileInput => !listToDownload.some(file => file.filename === fileInput))
+
       core.setOutput('file-names', JSON.stringify(
         listToDownload.map(file => file.filename)
       ))
       core.setOutput('file-paths', JSON.stringify(
         listToDownload.map(file => path.join(localDirPath, file.filename))
       ))
+      core.setOutput('file-names-not-found', JSON.stringify(
+        listNotFound
+      ))
+
+      if (listNotFound.length > 0) {
+        console.log('Some file names were not found in the remote directory')
+        // console.log('Files in remote directory:', allFiles.map(file => file.filename).join(', '))
+        // console.log('Files to download:', listToDownload.map(file => file.filename).join(', '))
+        console.log('Files not found:', listNotFound.join(', '))
+
+        if (failIfNoFiles) {
+          console.log('Failing the action because some file names were not found in the remote directory')
+          core.setFailed('Some file names were not found in the remote directory')
+        }
+      }
 
       if (listToDownload.length === 0) {
         console.log('No files to download')

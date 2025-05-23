@@ -31,3 +31,10 @@ inputs:
 runs:
   using: 'node20'
   main: 'dist/index.js'
+outputs:
+  file-names:
+    description: 'Array of strings of files downloaded'
+  file-paths:
+    description: 'Array of strings of file paths downloaded'
+  file-names-not-found:
+    description: 'Array of strings of files not found'

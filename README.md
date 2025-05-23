@@ -40,7 +40,10 @@ The local directory path to download files to. Default is `.`.
 
 ### `fail-if-no-files`
 
-Whether to fail if files are not found. Default is `'false'`. To Activate, set to `'true'`.
+Specifies whether the action should fail if files are not found. Default is `'false'`. Set to `'true'` to enable this behavior.
+If set to `'true'`:
+- When `file-patterns` are used, the action fails if no files are found that match the specified patterns.
+- When `file-names` are used, the action fails if any of the specified files are not found.
 
 
 ## Outputs
@@ -53,10 +56,14 @@ The file names that were attempted to be downloaded. Array of strings.
 
 The file paths of the downloaded files in local server. Array of strings.
 
+### `file-names-not-found`
+
+If file-names input is provided, this output will contain the file names that were not found on the remote server. Array of strings.
+
 ## Example usage
 
 ```yaml
-uses: actions/download-sftp-files@v1
+uses: juniorUsca/download-sftp-files@v2
 with:
   host: 'example.com'
   port: '22'
