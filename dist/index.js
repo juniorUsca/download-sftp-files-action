@@ -49343,6 +49343,8 @@ conn.on('ready', () => {
                 if (failIfNoFiles) {
                     console.log('Failing the action because some file names were not found in the remote directory');
                     core.setFailed('Some file names were not found in the remote directory');
+                    conn.end();
+                    return;
                 }
             }
             if (listToDownload.length === 0) {
@@ -49350,6 +49352,7 @@ conn.on('ready', () => {
                 console.log(`Files in remote directory: ${remoteDirPath}`, allFiles.map(file => file.filename).join(', '));
                 conn.end();
                 if (failIfNoFiles) {
+                    console.log('Failing the action because no files were found to download');
                     core.setFailed('No files to download');
                 }
                 return;
