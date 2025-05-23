@@ -1,6 +1,6 @@
 {
   "name": "download-sftp-files-action",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "main": "dist/index.js",
   "scripts": {
     "package": "npx ncc build src/index.ts -o dist --source-map --license licenses.txt",

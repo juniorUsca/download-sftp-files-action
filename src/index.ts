@@ -177,11 +177,13 @@ conn.on('ready', () => {
 
       if (listNotFound.length > 0) {
         console.log('Some file names were not found in the remote directory')
-        // console.log('Files in remote directory:', allFiles.map(file => file.filename).join(', '))
-        // console.log('Files to download:', listToDownload.map(file => file.filename).join(', '))
+        console.log('Number of files not found:', listNotFound.length)
         console.log('Files not found:', listNotFound.join(', '))
 
         if (failIfNoFiles) {
+          console.log('Number of files found:', listToDownload.length)
+          console.log('Files found:', listToDownload.map(file => file.filename).join(', '))
+          console.log('-------------------------')
           console.log('Failing the action because some file names were not found in the remote directory')
           core.setFailed('Some file names were not found in the remote directory')
 
